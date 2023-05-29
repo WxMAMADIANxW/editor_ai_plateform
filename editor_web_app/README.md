@@ -1,5 +1,15 @@
 This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
 
+
+
+## Running locally in development mode
+
+To get started, just clone the repository and run `npm install && npm run dev`:
+
+    git clone https://github.com/WxMAMADIANxW/editor_ai_plateform.git
+    npm install
+    npm run dev
+
 ## Getting Started
 
 First, run the development server:
