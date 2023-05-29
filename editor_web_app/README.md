@@ -3,6 +3,7 @@ This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next
 ## Versions :
 
 nextjs : 13.3.4
+
 nodejs : 18.16.0
 
 ## Running locally in development mode
