@@ -1,0 +1,11 @@
+#Data
+
+data/processed
+data/raw
+*.csv
+
+
+#conf
+
+conf/*.yaml
+conf/*.json
