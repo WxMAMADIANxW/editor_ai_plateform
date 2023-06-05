@@ -1,11 +1,16 @@
-#Data
-
+# Data
 data/processed
 data/raw
 *.csv
 
 
-#conf
-
+# Configurations
 conf/*.yaml
 conf/*.json
+
+# Terraform state
+*.tfstate
+*.tfstate.backup
+*.lock.hcl
+*.terraform
+infra/terraform.tfvars
