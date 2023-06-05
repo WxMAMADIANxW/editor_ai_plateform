@@ -1,64 +1,56 @@
 import os
 import urllib
-from typing import Tuple, List
-import logging
+from moviepy.video.io.ffmpeg_tools import ffmpeg_extract_subclip
 import boto3
-import split
-import config as conf
+import logging
 
-LOGGER = logging.getLogger(__name__)
-LOGGER.setLevel(logging.INFO)
+# Configure the logger
+logger = logging.getLogger()
+logger.setLevel(logging.INFO)
 
-s3 = boto3.client("s3")
-
-
-def lambda_handler(event, context) -> None:  # pylint: disable=unused-argument
-    """
-    Lambda function that is triggered by S3 events.
-    :param event:
-    :param context:
-    :return:
-    """
-    LOGGER.info("started preprocessing")
-    preprocess(event)
-    # process(user_id)
-    LOGGER.info("finished processing")
+CLIP_DURATION = 150
 
 
-def parse_event(event) -> Tuple[str, str]:#, str]:
-    """
-    Parse the event.
-    :param event:
-    :return:
-    """
+def lambda_handler(event, context):
+    # Retrieve input parameters from the event
     bucket = event["Records"][0]["s3"]["bucket"]["name"]
     key = urllib.parse.unquote_plus(
         event["Records"][0]["s3"]["object"]["key"], encoding="utf-8"
     )
-    # user_id = key.split("_")[-1].split(".")[0]
-    return bucket, key#, user_id
 
+    # Set up the S3 client
+    s3 = boto3.client('s3')
 
-def preprocess(event):
-    """
-    Preprocess the video.
-    :param event:
-    :return:
-    """
-    (bucket, key) = parse_event(event)
-    LOGGER.info(f"found new video from {bucket}/{key}")
-    tmp_file = conf.get_temp_file(key)
-    LOGGER.info(f"tmp_file: {tmp_file}")
-    os.makedirs("./tmp/raw", exist_ok=True)
-    os.makedirs("./tmp/splitted", exist_ok=True)
-    s3.download_file(bucket, key, tmp_file)
-    LOGGER.info(f"video successfully downloaded: {tmp_file}")
-    LOGGER.info(f"listdir tmp 1: {os.path.listdir('./tmp/raw/')}")
-    split.split_by_seconds(filename=tmp_file,
-                           split_length=conf.SPLIT_LENGTH,
-                           output_dir=conf.OUTPUT_DIR)
-    LOGGER.info(f"listdir tmp 2: {os.path.listdir('./tmp/splitted/')}")
-    output_files = conf.OUTPUT_DIR + key
-    s3.upload_file(output_files, bucket)
-    LOGGER.info(f"upload done")
+    # Get the file name without extension
+    file_name = os.path.splitext(os.path.basename(key))[0]
 
+    # Download the input video file from S3
+    input_file = f'/tmp/{key}'
+    s3.download_file(bucket, key, input_file)
+
+    # Calculate the total duration of the video
+    from moviepy.editor import VideoFileClip
+    video = VideoFileClip(input_file)
+    video_duration = video.duration
+
+    # Split the video into clips
+    start_time = 0
+    clip_number = 1
+
+    while start_time < video_duration:
+        end_time = min(start_time + CLIP_DURATION, video_duration)
+
+        clip_output_file = f'{file_name}_{start_time}_{end_time}.mp4'
+        clip_output_key = os.path.join("output", file_name, clip_output_file)
+        clip_output_path = f'/tmp/{clip_output_file}'
+
+        ffmpeg_extract_subclip(input_file, start_time, end_time, targetname=clip_output_path)
+
+        # Upload the clip to the output S3 bucket
+        s3.upload_file(clip_output_path, bucket, clip_output_key)
+        logger.info(f'Successfully split and uploaded clip {clip_number}')
+
+        start_time += CLIP_DURATION
+        clip_number += 1
+
+    logger.info('Video splitting complete!')

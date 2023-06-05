@@ -1,12 +1,11 @@
-FROM public.ecr.aws/lambda/python:3.8.2023.05.29.18
+FROM public.ecr.aws/lambda/python:3.8
 WORKDIR ${LAMBDA_TASK_ROOT}
 
-RUN yum update -y && yum install mesa-libGL -y
+RUN yum update -y
 
 COPY main.py main.py
-COPY config.py config.py
-COPY split.py split.py
 
-RUN pip3 install --upgrade pip
+RUN pip3 install --upgrade pip && \
+    pip3 install moviepy
 
 CMD ["main.lambda_handler"]
