@@ -21,14 +21,12 @@ resource null_resource ecr_image {
     docker_file = md5(file("../preprocessing/Dockerfile"))
   }
   provisioner "local-exec" {
-    #command = "aws ecr get-login-password --region ${var.region} --profile ${var.profile_name} | docker login --username AWS --password-stdin ${local.account_id}.dkr.ecr.${var.region}.amazonaws.com"
     command = <<EOF
            docker logout ${data.aws_caller_identity.current.account_id}.dkr.ecr.${var.region}.amazonaws.com
            docker login --username ${data.aws_ecr_authorization_token.token.user_name} --password ${data.aws_ecr_authorization_token.token.password} ${local.account_id}.dkr.ecr.${var.region}.amazonaws.com
            cd ../preprocessing
            docker buildx build --platform linux/amd64 --provenance=false -t ${aws_ecr_repository.repo.repository_url}:${local.ecr_image_tag} . --push
        EOF
-    #docker push ${aws_ecr_repository.repo.repository_url}:${local.ecr_image_tag}
   }
 }
 
