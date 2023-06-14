@@ -48,6 +48,6 @@ resource "aws_iam_policy" "process_logging_policy" {
 
 # Create the IAM Role for the Cloudwatch attachment logs
 resource "aws_iam_role_policy_attachment" "function_logging_policy_attachment" {
-  role = aws_iam_role.lambda_iam.id
+  role       = aws_iam_role.lambda_iam.id
   policy_arn = aws_iam_policy.process_logging_policy.arn
 }

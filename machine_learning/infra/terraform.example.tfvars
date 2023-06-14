@@ -1,9 +1,9 @@
 # General
-region                          = ""
-bucket_name                     = ""
-profile_name                    = ""
-lambda_role_name                = ""
-ecr_repository_name             = ""
+region              = ""
+bucket_name         = ""
+profile_name        = ""
+lambda_role_name    = ""
+ecr_repository_name = ""
 
 # Preprocess
 function_name_pipeline          = ""

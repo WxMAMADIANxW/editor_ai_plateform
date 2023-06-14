@@ -1,9 +1,13 @@
-variable "bucket_name" {
-  default = ""
-}
+locals {
+  bucket_name                     = "${var.app_name}-bucket"
+  lambda_role_name                = "${var.app_name}_lambda_iam_role"
+  lambda_iam_policy_name_pipeline = "${var.app_name}_lambda_iam_policy"
 
-variable "os" {
-  default = ""
+  preprocess_ecr_repository_name  = "${var.app_name}_preprocess_ecr_repository"
+  inference_ecr_repository_name   = "${var.app_name}_inference_ecr_repository"
+  postprocess_ecr_repository_name = "${var.app_name}_postprocess_ecr_repository"
+
+  inference_ecs_cluster_name    = "${var.app_name}_inference_ecs_cluster"
 }
 
 variable "region" {
@@ -14,15 +18,7 @@ variable "profile_name" {
   default = ""
 }
 
-variable "ecr_repository_name" {
-  default = ""
-}
-
 variable "function_name_pipeline" {
-  default = ""
-}
-
-variable "lambda_role_name" {
   default = ""
 }
 
@@ -30,10 +26,10 @@ variable "s3_bucket_id" {
   default = ""
 }
 
-variable "lambda_iam_policy_name_pipeline" {
+variable "policy_s3" {
   default = ""
 }
 
-variable "policy_s3" {
+variable "app_name" {
   default = ""
 }
