@@ -1,5 +1,6 @@
 locals {
-  bucket_name                     = "${var.app_name}-bucket"
+  raw_bucket_name                 = "${var.app_name}-raw-bucket"
+  splitted_bucket_name            = "${var.app_name}-splitted-bucket"
   lambda_role_name                = "${var.app_name}_lambda_iam_role"
   lambda_iam_policy_name_pipeline = "${var.app_name}_lambda_iam_policy"
   preprocess_ecr_repository_name  = "${var.app_name}-preprocess-ecr-repository"

@@ -18,11 +18,16 @@ resource "aws_lambda_function" "preprocess_lambda" {
   package_type  = "Image"
   memory_size   = "1024"
   timeout       = "300"
+  environment {
+    variables = {
+      OUTPUT_BUCKET = local.splitted_bucket_name
+    }
+  }
 }
 
 # Create the trigger from the S3 bucket to the Lambda function
 resource "aws_s3_bucket_notification" "aws-lambda-trigger" {
-  bucket = local.bucket_name
+  bucket = local.raw_bucket_name
   lambda_function {
     lambda_function_arn = aws_lambda_function.preprocess_lambda.arn
     events              = ["s3:ObjectCreated:*"]
@@ -37,7 +42,7 @@ resource "aws_lambda_permission" "process-permission" {
   action        = "lambda:InvokeFunction"
   function_name = aws_lambda_function.preprocess_lambda.function_name
   principal     = "s3.amazonaws.com"
-  source_arn    = "arn:aws:s3:::${local.bucket_name}"
+  source_arn    = "arn:aws:s3:::${local.raw_bucket_name}"
 }
 
 # Create an IAM Role for the S3 function

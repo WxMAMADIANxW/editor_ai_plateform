@@ -9,6 +9,7 @@ logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 
 CLIP_DURATION = 150
+OUTPUT_BUCKET = os.environ["OUTPUT_BUCKET"]
 
 
 def lambda_handler(event, context):
@@ -47,7 +48,7 @@ def lambda_handler(event, context):
         ffmpeg_extract_subclip(input_file, start_time, end_time, targetname=clip_output_path)
 
         # Upload the clip to the output S3 bucket
-        s3.upload_file(clip_output_path, bucket, clip_output_key)
+        s3.upload_file(clip_output_path, OUTPUT_BUCKET, clip_output_key)
         logger.info(f'Successfully split and uploaded clip {clip_number}')
 
         start_time += CLIP_DURATION
