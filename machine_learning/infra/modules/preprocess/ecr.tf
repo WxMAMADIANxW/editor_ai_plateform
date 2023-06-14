@@ -9,33 +9,31 @@ data aws_caller_identity current {}
 
 data aws_ecr_authorization_token token {}
 
-resource aws_ecr_repository repo {
-  name         = var.ecr_repository_name
+resource aws_ecr_repository preprocess_repo {
+  name         = local.preprocess_ecr_repository_name
   force_delete = true
 }
 
-resource null_resource ecr_image {
-  depends_on = [aws_ecr_repository.repo]
+resource null_resource preprocess_ecr_image {
+  depends_on = [aws_ecr_repository.preprocess_repo]
   triggers   = {
     python_file = md5(file("../preprocessing/main.py"))
     docker_file = md5(file("../preprocessing/Dockerfile"))
   }
   provisioner "local-exec" {
-    #command = "aws ecr get-login-password --region ${var.region} --profile ${var.profile_name} | docker login --username AWS --password-stdin ${local.account_id}.dkr.ecr.${var.region}.amazonaws.com"
     command = <<EOF
            docker logout ${data.aws_caller_identity.current.account_id}.dkr.ecr.${var.region}.amazonaws.com
            docker login --username ${data.aws_ecr_authorization_token.token.user_name} --password ${data.aws_ecr_authorization_token.token.password} ${local.account_id}.dkr.ecr.${var.region}.amazonaws.com
            cd ../preprocessing
-           docker buildx build --platform linux/amd64 --provenance=false -t ${aws_ecr_repository.repo.repository_url}:${local.ecr_image_tag} . --push
+           docker buildx build --platform linux/amd64 --provenance=false -t ${aws_ecr_repository.preprocess_repo.repository_url}:${local.ecr_image_tag} . --push
        EOF
-    #docker push ${aws_ecr_repository.repo.repository_url}:${local.ecr_image_tag}
   }
 }
 
-data aws_ecr_image lambda_image {
+data aws_ecr_image preprocess_lambda_image {
   depends_on = [
-    null_resource.ecr_image
+    null_resource.preprocess_ecr_image
   ]
-  repository_name = var.ecr_repository_name
+  repository_name = local.preprocess_ecr_repository_name
   image_tag       = local.ecr_image_tag
 }

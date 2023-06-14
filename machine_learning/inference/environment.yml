@@ -1,0 +1,22 @@
+name: moment_detr
+channels:
+  - conda-forge
+  - defaults
+  - pytorch
+dependencies:
+  - python=3.7
+  - pytorch
+  - torchvision
+  - torchaudio
+  - cudatoolkit=11.0
+  - pip:
+      - tqdm
+      - ipython
+      - easydict
+      - tensorboard
+      - tabulate
+      - scikit-learn
+      - pandas
+      - ffmpeg-python
+      - ftfy
+      - regex

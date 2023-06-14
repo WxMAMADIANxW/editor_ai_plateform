@@ -9,7 +9,7 @@ terraform {
       version = "2.16.0"
     }
     null = {
-      source  = "hashicorp/null"
+      source = "hashicorp/null"
     }
   }
 }
