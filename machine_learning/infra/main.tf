@@ -2,8 +2,7 @@ module "preprocess" {
   source                 = "./modules/preprocess"
   app_name               = var.app_name
   region                 = var.region
-#  function_name_pipeline = var.function_name_pipeline
-  s3_bucket_id           = var.s3_bucket_id
+#  s3_bucket_id           = var.s3_bucket_id
   policy_s3              = var.policy_s3
 }
 
