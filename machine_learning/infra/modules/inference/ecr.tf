@@ -10,14 +10,14 @@ data aws_caller_identity current {}
 data aws_ecr_authorization_token token {}
 
 resource aws_ecr_repository inference_repo {
-  name         = var.inference_ecr_repository_name
+  name         = local.inference_ecr_repository_name
   force_delete = true
 }
 
 resource null_resource inference_ecr_image {
   depends_on = [aws_ecr_repository.inference_repo]
   triggers   = {
-    python_file = md5(file("../inference/main.py"))
+#    python_file = md5(file("../inference/main.py"))
     docker_file = md5(file("../inference/Dockerfile"))
   }
   provisioner "local-exec" {
@@ -30,10 +30,10 @@ resource null_resource inference_ecr_image {
   }
 }
 
-data aws_ecr_image ec2_image {
-  depends_on = [
-    null_resource.inference_ecr_image
-  ]
-  repository_name = local.inference_ecr_repository_name
-  image_tag       = local.ecr_image_tag
-}
+#data aws_ecr_image ec2_image {
+#  depends_on = [
+#    null_resource.inference_ecr_image
+#  ]
+#  repository_name = local.inference_ecr_repository_name
+#  image_tag       = local.ecr_image_tag
+#}

@@ -33,3 +33,15 @@ variable "policy_s3" {
 variable "app_name" {
   default = ""
 }
+
+variable "public_subnets" {
+  default = ""
+}
+
+variable "private_subnets" {
+  default = ""
+}
+
+variable "availability_zones" {
+  default = ""
+}
