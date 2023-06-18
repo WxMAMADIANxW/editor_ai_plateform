@@ -4,8 +4,8 @@
     "networkMode": "awsvpc",
     "name": "editor-ai-platform-container",
     "image": "${REPOSITORY_URL}:latest",
-    "cpu": 1024,
-    "memory": 2048,
+    "cpu": 2048,
+    "memory": 10240,
     "portMappings": [
         {
           "containerPort": 8080,

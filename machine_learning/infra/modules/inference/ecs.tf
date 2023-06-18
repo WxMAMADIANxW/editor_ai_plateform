@@ -13,12 +13,13 @@ resource "aws_ecs_task_definition" "inference_task_definition" {
 
   container_definitions = templatefile("./modules/inference/task_definition.json.tpl", {
     REPOSITORY_URL   = aws_ecrpublic_repository.inference_repo.repository_uri,
-    CLOUDWATCH_GROUP = aws_cloudwatch_log_group.log-group.id, REGION = var.region
+    CLOUDWATCH_GROUP = aws_cloudwatch_log_group.log-group.id,
+    REGION = var.region
   })
 
-  network_mode     = "awsvpc"
-  cpu              = 1024
-  memory           = 4096
+  network_mode = "awsvpc"
+  cpu          = 4096
+  memory       = 20480
 
   tags = {
     Name = "${var.app_name}-ecs-td"
@@ -52,6 +53,6 @@ resource "aws_ecs_service" "inference_worker" {
     container_port   = 8080
   }
 
-  platform_version = "1.3.0"
-  depends_on = [aws_lb_listener.listener]
+  platform_version = "1.4.0"
+  depends_on       = [aws_lb_listener.listener]
 }
