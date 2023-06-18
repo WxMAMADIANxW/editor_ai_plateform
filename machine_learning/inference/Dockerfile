@@ -10,4 +10,10 @@ COPY main.py main.py
 ENV SQS_QUEUE_NAME="s3-event-queue"
 ENV AWS_REGION="us-east-1"
 
+# TODO: Find a way to fill these next variables automatically
+ENV REDIS_HOST="editor-ai-platform-elasticache-cluster.tprabp.0001.use1.cache.amazonaws.com"
+ENV REDIS_PORT="6379"
+ENV REDIS_PASSWORD=""
+ENV REDIS_USERNAME="default"
+
 CMD ["python3", "main.py"]

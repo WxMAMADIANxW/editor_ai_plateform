@@ -1,6 +1,6 @@
 resource "aws_elasticache_subnet_group" "group" {
   name       = local.elasticache_subnet_group_name
-  subnet_ids = [var.subnet_id]  # Replace with your subnet IDs
+  subnet_ids = var.subnet_ids  # Replace with your subnet IDs
 }
 
 resource "aws_elasticache_cluster" "redis-cluster" {

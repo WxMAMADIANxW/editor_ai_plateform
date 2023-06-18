@@ -22,9 +22,9 @@ module "queue" {
   s3_bucket_id  = module.preprocess.s3_bucket_id
 }
 
-#module "cache" {
-#  source = "./modules/cache"
-#  app_name = var.app_name
-#  subnet_id = module.inference.subnet_id
-#  vpc_id = module.inference.vpc_id
-#}
+module "cache" {
+  source = "./modules/cache"
+  app_name = var.app_name
+  subnet_ids = module.inference.subnet_ids
+  vpc_id = module.inference.vpc_id
+}
