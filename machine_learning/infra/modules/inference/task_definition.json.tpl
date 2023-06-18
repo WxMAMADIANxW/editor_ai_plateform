@@ -17,7 +17,7 @@
           "options": {
             "awslogs-group": "${CLOUDWATCH_GROUP}",
             "awslogs-region": "${REGION}",
-            "awslogs-stream-prefix": "editor-ai-platform-logs"
+            "awslogs-stream-prefix": "editor-ai-platform"
           }
         }
   }

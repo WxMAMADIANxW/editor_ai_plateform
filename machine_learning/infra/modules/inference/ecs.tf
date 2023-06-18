@@ -12,13 +12,13 @@ resource "aws_ecs_task_definition" "inference_task_definition" {
   execution_role_arn       = aws_iam_role.ecsTaskExecutionRole.arn
 
   container_definitions = templatefile("./modules/inference/task_definition.json.tpl", {
-    REPOSITORY_URL   = aws_ecr_repository.inference_repo.repository_url,
+    REPOSITORY_URL   = aws_ecrpublic_repository.inference_repo.repository_uri,
     CLOUDWATCH_GROUP = aws_cloudwatch_log_group.log-group.id, REGION = var.region
   })
 
-  network_mode = "awsvpc"
-  cpu          = 1024
-  memory       = 4096
+  network_mode     = "awsvpc"
+  cpu              = 1024
+  memory           = 4096
 
   tags = {
     Name = "${var.app_name}-ecs-td"
@@ -39,7 +39,7 @@ resource "aws_ecs_service" "inference_worker" {
   force_new_deployment = true
 
   network_configuration {
-    subnets          = aws_subnet.private.*.id
+    subnets          = aws_subnet.public.*.id
     assign_public_ip = true
     security_groups  = [
       aws_security_group.service_security_group.id, aws_security_group.load_balancer_security_group.id
@@ -52,5 +52,6 @@ resource "aws_ecs_service" "inference_worker" {
     container_port   = 8080
   }
 
+  platform_version = "1.3.0"
   depends_on = [aws_lb_listener.listener]
 }
