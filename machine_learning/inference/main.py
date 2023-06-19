@@ -54,6 +54,7 @@ while True:
             # TODO #3: Push data to AWS ElastiCache (Redis) instance
             redis = Redis(host=REDIS_HOST, port=REDIS_PORT, decode_responses=True, ssl=True, username=REDIS_USERNAME,
                           password=REDIS_PASSWORD) # ERROR during connection: Error 110 connecting to editor-ai-platform-elasticache-cluster.tprabp.0001.use1.cache.amazonaws.com:6379. Connection timed out.
+            # TODO: Test avec RedisCluster bg
             if redis.ping():
                 print('Connected to Redis')
                 logger.info('Connected to Redis')
