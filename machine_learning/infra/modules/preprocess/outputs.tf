@@ -5,3 +5,7 @@ output "s3_bucket_id" {
 output "s3_bucket_arn" {
   value = aws_s3_bucket.s3_bucket_splitted.arn
 }
+
+output "s3_raw_bucket_name" {
+  value = aws_s3_bucket.s3_bucket_raw.bucket
+}
