@@ -1,0 +1,13 @@
+{
+  "type": "service_account",
+  "project_id": "editor-ai-390116",
+  "private_key_id": "7e728d50b86d429cf3284583460681baaafdd79e",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQCxudvw+HpKpLyx\nVic8ZDCJS8xMN7ulqValAmYVjbsgiIZgeJH5/1TO7E+SyOroRao1y/AKpDpQG6x+\nOGSxP/f4LD7tXBBiFJKni6ZYtMbaYoN78OUb2aQfdnRCILQTyXSAdILZ1CDS4JkP\nh3N3eX4zpUNqfqfW/n4wylyUoMSWLv8zgjd5qh0TaHGc+PNd4ZwGp4IcSUuAvatf\nJi/ZZMiEje2zySKKgDI/lPkfzOwMMgtPLTQdYejtAYH8UhEhknBQP8t/RcctUcRq\neqmJMf+DDvGXqueAzgT16vTqyfVmOhrzXG1+HB7yh+DDnRyYHrNS9/bTXjV0J/mT\n2ycdGr+dAgMBAAECggEACFNBpW2Fg8xPOkrKaDnbC/3Ohy4S+D0XarMTBDf0XjjS\nLwZlQI3dU5sX7ozCwKVaX/SnacXMvuNo+cZ0/j7JN0+4e+bUrdXmX8eHv/IdILsK\nizc0pRCvIqBdhk2txptPF1RXeJ8HKzGrrqGxWKIKwoSsXlQqbKsIglfixqPFFn7V\nX8fpEavU3fh6RcIJoNJEniQPK1eINMWe/wVOgV00UhRGZJyodoOlCc9NDa8VSSJj\naeHMh56VFH5ij9/ObrT6XGUPDh9KHl22LFYRXU0xxV8C2Ogz/sUmIWrnfpLK0VMF\nstIWABPUicLB2I9v4Jq/tPJy/vuLSpKcTrjtaPg0qQKBgQD4cm95FFDtLFsxN8nd\nlCsVtr4k1XP2ttprMgVqNsKCnzRAU1wQ0bUIjsOYcBdwxCNhOShMzXtoWYQCuJMf\nfHYaVOjb7Pm38CH/KJ8AozCFP2OYAU3DNdEvjPZyldJnCp9b0MGIiYAZLACrws1a\neK3YBWW3yKV4jN4FpJ5QjfoQeQKBgQC3IQe7cxp1b69fcCC9O3XFFRycNuS2ZBNp\nFVuVhsXW9wRBgotogc95TlLpu7WvKiXXsJNOUiv3HqcVLjnPBmD/Mm3K8ccmmIYy\nHhoCeBgclXeSe23dgIg9NhF5KCRzBHJ41a4Vp087hk1mt91CjynIhR29a125pU6k\nF0t4XgkHRQKBgQCvRjRkbDPHjwJqz5vnaW+X6wtr+vbLuCaRd4GgdC93bY+0Tdrm\ntruL5QQSmAnBcW4wWd2XiWOls3lRXhvVG75KR1rcROvLm2qwk1zRW0+Qwa6mf0z4\nChChBkabgh0kurbAVJ8kjzTDDWsPweeUCw1CGFSxeqlaSa8ctg1GcVNYqQKBgQCH\nWMUzOJYkl6ABJIk98tVPDRRxLG0LlJl4AA4JTGuqPjUKCebpHY/u8wF6uH5GcRs4\n98tXhonyAdixYdHd/bPwyR+2b82l6/K61d6ZVpNThPCz9b+0hwuqWey+I/oUfAPy\n5NLeNCLuNou8UEYarF7QUfoyBklmLRQbWRAxbSa1FQKBgH6K0MGZcK4Wx+lO3pgP\nlK1VdKvpAOndOPbzPOrnN9CEznBXiCZyHJYShEegQxSK8ZPMnaMtjG75/Rv6XiIJ\naB5aSgf+cvTIcnr6jbCvcmX0KJiRpbtIMIbDr/x6p0mXoiZcJ9UZzwbvuiotS4dz\nvA8eWtabcaLZtUiHV0Js6PqA\n-----END PRIVATE KEY-----\n",
+  "client_email": "video-intel@editor-ai-390116.iam.gserviceaccount.com",
+  "client_id": "118361911288444578397",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/video-intel%40editor-ai-390116.iam.gserviceaccount.com",
+  "universe_domain": "googleapis.com"
+}
