@@ -1,4 +1,4 @@
-FROM public.ecr.aws/lambda/python:3.8-alpine3.12
+FROM public.ecr.aws/lambda/python:3.8
 WORKDIR ${LAMBDA_TASK_ROOT}
 
 RUN yum update -y
