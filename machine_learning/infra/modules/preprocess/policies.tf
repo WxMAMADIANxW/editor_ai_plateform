@@ -22,8 +22,7 @@ data "aws_iam_policy_document" "policy_s3" {
     resources = ["*"]
 
     actions = [
-      "s3:*",
-      "ses:*",
+      "s3:*", "ses:*",
     ]
   }
 }
@@ -32,15 +31,11 @@ data "aws_iam_policy_document" "policy_s3" {
 resource "aws_iam_policy" "process_logging_policy" {
   name   = "function-logging-policy"
   policy = jsonencode({
-    "Version" : "2012-10-17",
-    "Statement" : [
+    "Version" : "2012-10-17", "Statement" : [
       {
         Action : [
-          "logs:CreateLogStream",
-          "logs:PutLogEvents"
-        ],
-        Effect : "Allow",
-        Resource : "arn:aws:logs:*:*:*"
+          "logs:CreateLogStream", "logs:PutLogEvents"
+        ], Effect : "Allow", Resource : "arn:aws:logs:*:*:*"
       }
     ]
   })

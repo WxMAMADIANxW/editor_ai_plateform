@@ -7,7 +7,7 @@ locals {
   inference_ecr_repository_name   = "${var.app_name}_inference_ecr_repository"
   postprocess_ecr_repository_name = "${var.app_name}_postprocess_ecr_repository"
 
-  inference_ecs_cluster_name    = "${var.app_name}_inference_ecs_cluster"
+  inference_ecs_cluster_name = "${var.app_name}_inference_ecs_cluster"
 }
 
 variable "region" {
@@ -33,3 +33,17 @@ variable "policy_s3" {
 variable "app_name" {
   default = ""
 }
+
+variable "public_subnets" {
+  default = ""
+}
+
+variable "private_subnets" {
+  default = ""
+}
+
+variable "availability_zones" {
+  default = ""
+}
+
+variable "redis_password" {}

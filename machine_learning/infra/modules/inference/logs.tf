@@ -5,6 +5,6 @@ resource "aws_cloudwatch_log_group" "log-group" {
     prevent_destroy = false
   }
   tags = {
-    Name        = var.app_name
+    Name = var.app_name
   }
 }

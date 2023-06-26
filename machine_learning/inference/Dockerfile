@@ -1,14 +1,26 @@
-FROM continuumio/miniconda3
+FROM python:3.8-slim-buster
 
-# Install git
-RUN apt-get update && apt-get install -y git
+COPY requirements.txt requirements.txt
 
-# Create the environment:
-COPY environment.yml .
-RUN conda env create -f environment.yml
+RUN pip3 install --upgrade pip
+RUN pip3 install -r requirements.txt
 
-# Clone a repo
-# TODO: Not done yet, check reminders
-RUN git clone https://github.com/jayleicn/moment_detr.git
+COPY main.py main.py
 
-ENTRYPOINT ["conda", "run", "--no-capture-output", "-n", "moment_detr", "PYTHONPATH=$PYTHONPATH:.", "python", "run_on_video/run.py"]
+ARG SQS_QUEUE_NAME
+ARG AWS_REGION=us-east-1
+
+ARG REDIS_HOST
+ARG REDIS_PORT=6379
+ARG REDIS_PASSWORD
+ARG REDIS_USERNAME
+
+ENV SQS_QUEUE_NAME=${SQS_QUEUE_NAME}
+ENV AWS_REGION=${AWS_REGION}
+
+ENV REDIS_HOST=${REDIS_HOST}
+ENV REDIS_PORT=${REDIS_PORT}
+ENV REDIS_USERNAME=${REDIS_USERNAME}
+ENV REDIS_PASSWORD=${REDIS_PASSWORD}
+
+CMD ["python3", "main.py"]

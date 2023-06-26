@@ -15,9 +15,12 @@ OUTPUT_BUCKET = os.environ["OUTPUT_BUCKET"]
 def lambda_handler(event, context):
     # Retrieve input parameters from the event
     bucket = event["Records"][0]["s3"]["bucket"]["name"]
-    key = urllib.parse.unquote_plus(
-        event["Records"][0]["s3"]["object"]["key"], encoding="utf-8"
-    )
+    key = urllib.parse.unquote_plus(event["Records"][0]["s3"]["object"]["key"], encoding="utf-8")
+    print(f"Bucket: {bucket}, Key: {key}")
+
+    project_id = key.split("/")[0]
+    print(f"Project ID: {project_id}")
+    os.makedirs(f"/tmp/{project_id}", exist_ok=True)
 
     # Set up the S3 client
     s3 = boto3.client('s3')
@@ -42,8 +45,9 @@ def lambda_handler(event, context):
         end_time = min(start_time + CLIP_DURATION, video_duration)
 
         clip_output_file = f'{file_name}_{start_time}_{end_time}.mp4'
-        clip_output_key = os.path.join("output", file_name, clip_output_file)
-        clip_output_path = f'/tmp/{clip_output_file}'
+        clip_output_key = os.path.join(project_id, clip_output_file)
+        clip_output_path = f'/tmp/{project_id}/{clip_output_file}'
+        print(f'Clip output key: {clip_output_key}')
 
         ffmpeg_extract_subclip(input_file, start_time, end_time, targetname=clip_output_path)
 

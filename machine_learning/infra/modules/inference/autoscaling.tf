@@ -1,19 +1,39 @@
-resource "aws_launch_configuration" "ecs_launch_config" {
-    image_id             = "ami-094d4d00fd7462815"
-    iam_instance_profile = aws_iam_instance_profile.ecs_agent.name
-    security_groups      = [aws_security_group.ecs_sg.id]
-    user_data            = "#!/bin/bash\necho ECS_CLUSTER='${var.app_name}-cluster' >> /etc/ecs/ecs.config"
-    instance_type        = "t2.micro"
+resource "aws_appautoscaling_target" "ecs_target" {
+  max_capacity       = 0
+  min_capacity       = 0
+  resource_id        = "service/${aws_ecs_cluster.inference_ecs_cluster.name}/${aws_ecs_service.inference_worker.name}"
+  scalable_dimension = "ecs:service:DesiredCount"
+  service_namespace  = "ecs"
 }
 
-resource "aws_autoscaling_group" "failure_analysis_ecs_asg" {
-    name                      = "asg"
-    vpc_zone_identifier       = [aws_subnet.pub_subnet.id]
-    launch_configuration      = aws_launch_configuration.ecs_launch_config.name
+resource "aws_appautoscaling_policy" "ecs_policy_memory" {
+  name               = "${var.app_name}-memory-autoscaling"
+  policy_type        = "TargetTrackingScaling"
+  resource_id        = aws_appautoscaling_target.ecs_target.resource_id
+  scalable_dimension = aws_appautoscaling_target.ecs_target.scalable_dimension
+  service_namespace  = aws_appautoscaling_target.ecs_target.service_namespace
 
-    desired_capacity          = 2
-    min_size                  = 1
-    max_size                  = 10
-    health_check_grace_period = 300
-    health_check_type         = "EC2"
+  target_tracking_scaling_policy_configuration {
+    predefined_metric_specification {
+      predefined_metric_type = "ECSServiceAverageMemoryUtilization"
+    }
+
+    target_value = 80
+  }
+}
+
+resource "aws_appautoscaling_policy" "ecs_policy_cpu" {
+  name               = "${var.app_name}-cpu-autoscaling"
+  policy_type        = "TargetTrackingScaling"
+  resource_id        = aws_appautoscaling_target.ecs_target.resource_id
+  scalable_dimension = aws_appautoscaling_target.ecs_target.scalable_dimension
+  service_namespace  = aws_appautoscaling_target.ecs_target.service_namespace
+
+  target_tracking_scaling_policy_configuration {
+    predefined_metric_specification {
+      predefined_metric_type = "ECSServiceAverageCPUUtilization"
+    }
+
+    target_value = 80
+  }
 }
