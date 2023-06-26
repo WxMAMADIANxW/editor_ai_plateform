@@ -37,7 +37,6 @@ resource "aws_s3_bucket_notification" "aws-lambda-trigger" {
 
 # Create the Lambda function permissions
 resource "aws_lambda_permission" "process-permission" {
-  #  depends_on    = [aws_s3_bucket.s3_bucket]
   statement_id  = "AllowS3Invoke"
   action        = "lambda:InvokeFunction"
   function_name = aws_lambda_function.preprocess_lambda.function_name

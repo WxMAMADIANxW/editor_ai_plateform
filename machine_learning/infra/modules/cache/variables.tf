@@ -23,7 +23,8 @@ variable "subnet_ids" {
     default = []
 }
 
-#variable "key_name" {
-#  type    = string
-#  default = ""
-#}
+variable "security_group_id" {}
+
+variable "redis_password" {
+  type    = string
+}

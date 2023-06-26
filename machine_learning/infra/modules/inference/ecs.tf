@@ -13,8 +13,7 @@ resource "aws_ecs_task_definition" "inference_task_definition" {
 
   container_definitions = templatefile("./modules/inference/task_definition.json.tpl", {
     REPOSITORY_URL   = aws_ecrpublic_repository.inference_repo.repository_uri,
-    CLOUDWATCH_GROUP = aws_cloudwatch_log_group.log-group.id,
-    REGION = var.region
+    CLOUDWATCH_GROUP = aws_cloudwatch_log_group.log-group.id, REGION = var.region
   })
 
   network_mode = "awsvpc"
@@ -34,7 +33,7 @@ resource "aws_ecs_service" "inference_worker" {
   name                 = "${var.app_name}-cluster"
   cluster              = aws_ecs_cluster.inference_ecs_cluster.id
   task_definition      = "${aws_ecs_task_definition.inference_task_definition.family}:${max(aws_ecs_task_definition.inference_task_definition.revision, data.aws_ecs_task_definition.main.revision)}"
-  desired_count        = 1
+  desired_count        = 0
   launch_type          = "FARGATE"
   scheduling_strategy  = "REPLICA"
   force_new_deployment = true

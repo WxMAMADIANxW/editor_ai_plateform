@@ -6,13 +6,11 @@ locals {
 variable "region" {
   description = "The AWS region to deploy to"
   type        = string
-#  default     = ""
 }
 
 variable "app_name" {
   description = "The name of the application"
   type        = string
-#  default     = ""
 }
 
 variable "public_subnets" {
@@ -25,4 +23,20 @@ variable "private_subnets" {
 
 variable "availability_zones" {
   default = ""
+}
+
+variable "sqs_queue_name" {
+  default = ""
+}
+
+variable "redis_host" {
+  default = ""
+}
+
+variable "redis_username" {
+    default = ""
+}
+
+variable "redis_password" {
+    default = ""
 }

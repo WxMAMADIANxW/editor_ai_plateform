@@ -6,3 +6,6 @@ up:
 
 down:
 	terraform destroy -var-file=terraform.tfvars -auto-approve;
+
+dr:
+	terraform destroy -var-file=terraform.tfvars -auto-approve -target $(filter-out $@,$(MAKECMDGOALS));

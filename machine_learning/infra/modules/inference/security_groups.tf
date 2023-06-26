@@ -8,6 +8,29 @@ resource "aws_security_group" "service_security_group" {
     security_groups = [aws_security_group.load_balancer_security_group.id]
   }
 
+  ingress {
+    from_port   = 443
+    to_port     = 443
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  ingress {
+    # elasticache
+    from_port   = 6379
+    to_port     = 6379
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  ingress {
+    # ssh
+    from_port   = 22
+    to_port     = 22
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
   egress {
     from_port        = 0
     to_port          = 0
@@ -17,7 +40,7 @@ resource "aws_security_group" "service_security_group" {
   }
 
   tags = {
-    Name        = "${var.app_name}-service-sg"
+    Name = "${var.app_name}-service-sg"
   }
 }
 
@@ -40,6 +63,6 @@ resource "aws_security_group" "load_balancer_security_group" {
     ipv6_cidr_blocks = ["::/0"]
   }
   tags = {
-    Name        = "${var.app_name}-sg"
+    Name = "${var.app_name}-sg"
   }
 }

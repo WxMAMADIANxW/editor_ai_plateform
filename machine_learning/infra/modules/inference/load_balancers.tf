@@ -6,7 +6,7 @@ resource "aws_alb" "application_load_balancer" {
   security_groups    = [aws_security_group.load_balancer_security_group.id]
 
   tags = {
-    Name        = "${var.app_name}-alb"
+    Name = "${var.app_name}-alb"
   }
 }
 
@@ -28,7 +28,7 @@ resource "aws_lb_target_group" "target_group" {
   }
 
   tags = {
-    Name        = "${var.app_name}-lb-tg"
+    Name = "${var.app_name}-lb-tg"
   }
 }
 

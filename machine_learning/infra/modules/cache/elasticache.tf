@@ -1,18 +1,28 @@
-resource "aws_elasticache_subnet_group" "group" {
-  name       = local.elasticache_subnet_group_name
-  subnet_ids = var.subnet_ids  # Replace with your subnet IDs
+resource "aws_memorydb_acl" "memorydb_acl" {
+  name       = "${var.app_name}-redis-acl-cluster"
+  user_names = [aws_memorydb_user.default_user.user_name]
 }
 
-resource "aws_elasticache_cluster" "redis-cluster" {
-  cluster_id               = local.elasticache_cluster_name
-  engine                   = "redis"
-  engine_version           = "6.x"
-  node_type                = "cache.t2.micro"
-  num_cache_nodes          = 1
-  port                     = 6379
-  subnet_group_name        = aws_elasticache_subnet_group.group.name
-  parameter_group_name     = "default.redis6.x"
-  maintenance_window       = "mon:03:00-mon:04:00"  # Maintenance window in UTC
-  snapshot_retention_limit = 5
-  snapshot_window          = "08:00-10:00"  # Snapshot window in UTC
+resource "aws_memorydb_subnet_group" "redis_subnet_group" {
+  name       = "${var.app_name}-redis-subnet-group"
+  subnet_ids = var.subnet_ids
+}
+
+resource "aws_memorydb_cluster" "redis_cluster" {
+  name               = "${var.app_name}-redis-cluster"
+  num_shards         = 1
+  subnet_group_name  = aws_memorydb_subnet_group.redis_subnet_group.name
+  acl_name           = aws_memorydb_acl.memorydb_acl.name
+  node_type          = "db.t4g.small"
+  security_group_ids = [var.security_group_id]
+}
+
+resource "aws_memorydb_user" "default_user" {
+  user_name     = "reda-user"
+  access_string = "on ~* &* +@all"
+
+  authentication_mode {
+    type      = "password"
+    passwords = [var.redis_password]
+  }
 }
