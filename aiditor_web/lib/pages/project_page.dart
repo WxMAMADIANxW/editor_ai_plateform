@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:youtube_player_iframe_plus/youtube_player_iframe_plus.dart';
+import 'package:player_js/player_js.dart';
 
 class ProjectDetailsScreen extends StatefulWidget {
   final String? projectId;
@@ -12,40 +12,23 @@ class ProjectDetailsScreen extends StatefulWidget {
 }
 
 class _ProjectDetailsScreenState extends State<ProjectDetailsScreen> {
-  late YoutubePlayerController _controller;
   late String _currentVideoUrl;
+  List<String> _videosToDownload = [];
 
   @override
   void initState() {
     super.initState();
-
-
-    _currentVideoUrl = '';
-    _controller = YoutubePlayerController(
-      initialVideoId: '',
-      params: const YoutubePlayerParams(
-        showControls: true,
-        showFullscreenButton: true,
-      ),
-    );
-  }
-
-  @override
-  void dispose() {
-    _controller.close();
-    super.dispose();
+    _currentVideoUrl = getProjectVideos().then((value) => value.first.data()?['url']).toString();
   }
 
   Widget _buildVideo(String url) {
-    final videoId = YoutubePlayerController.convertUrlToId(url).toString();
-
-    if (videoId != _controller.metadata.videoId) {
-      _controller.load(videoId);
-    }
-
-    return YoutubePlayerIFramePlus(
-      controller: _controller,
-      aspectRatio: 16 / 9,
+    return Player(
+                  videoUrl:
+                  url,
+                  subtitles: {
+                  },
+                  height: 700,
+                  width: 900,
     );
   }
 
@@ -56,10 +39,7 @@ class _ProjectDetailsScreenState extends State<ProjectDetailsScreen> {
         .get()
         .then((value) => value.docs.first.id);
 
-    await FirebaseFirestore.instance
-        .collection('aiditor_projects')
-        .doc(docId)
-        .delete();
+    await FirebaseFirestore.instance.collection('aiditor_projects').doc(docId).delete();
   }
 
   Future<List<DocumentSnapshot<Map<String, dynamic>>>> getProjectVideos() async {
@@ -85,10 +65,6 @@ class _ProjectDetailsScreenState extends State<ProjectDetailsScreen> {
 
   @override
   Widget build(BuildContext context) {
-     
-
-
-
     return Scaffold(
       appBar: AppBar(
         title: Text('Project Details'),
@@ -113,20 +89,22 @@ class _ProjectDetailsScreenState extends State<ProjectDetailsScreen> {
                 Expanded(
                   flex: 2,
                   child: Container(
-                    margin: EdgeInsets.all(40),
-                    child: _buildVideo(_currentVideoUrl),
+                    margin: const EdgeInsets.all(40),
+                    child: _buildVideo(projectVideos.first.data()!['url'].toString()),
                   ),
                 ),
                 Expanded(
                   flex: 1,
                   child: Container(
-                    margin: EdgeInsets.all(40),
+                    margin: const EdgeInsets.all(40),
                     child: ListView.builder(
                       itemCount: projectVideos.length,
                       itemBuilder: (context, index) {
                         final videoData = projectVideos[index].data();
                         final videoUrl = videoData?['url'];
                         final videoName = videoData?['filename'];
+                        final videoId = "This is a result clip from the raw video";
+                        final isSelected = _videosToDownload.contains(videoUrl);
                         return Card(
                           child: ListTile(
                             onTap: () {
@@ -135,7 +113,32 @@ class _ProjectDetailsScreenState extends State<ProjectDetailsScreen> {
                               });
                             },
                             title: Text(videoName ?? ''),
-                            subtitle: Text(videoUrl ?? ''),
+                            subtitle: Text(videoId ?? ''),
+                            trailing: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                IconButton(
+                                  icon: Icon(Icons.play_arrow),
+                                  onPressed: () {
+                                    setState(() {
+                                      _currentVideoUrl = videoUrl ?? '';
+                                    });
+                                  },
+                                ),
+                                IconButton(
+                                  icon: Icon(isSelected ? Icons.remove_circle : Icons.add_circle),
+                                  onPressed: () {
+                                    setState(() {
+                                      if (isSelected) {
+                                        _videosToDownload.remove(videoUrl);
+                                      } else {
+                                        _videosToDownload.add(videoUrl);
+                                      }
+                                    });
+                                  },
+                                ),
+                              ],
+                            ),
                           ),
                         );
                       },
@@ -145,11 +148,18 @@ class _ProjectDetailsScreenState extends State<ProjectDetailsScreen> {
               ],
             );
           } else {
-            return Center(
+            return const Center(
               child: CircularProgressIndicator(),
             );
           }
         },
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          // Handle download functionality
+          print('Videos to download: $_videosToDownload');
+        },
+        child: Icon(Icons.download),
       ),
     );
   }

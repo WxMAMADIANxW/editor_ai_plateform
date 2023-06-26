@@ -288,7 +288,7 @@ class _HomePageState extends State<HomePage> {
                         onTap: (){
                           Navigator.of(context).push(
                             MaterialPageRoute(
-                              builder: (context) => ProjectDetailsScreen(projectId: projectId, ),
+                              builder: (context) => ProjectDetailsScreen(projectId: projectId, ),//MyWidget(),
                             ),
                           );
                         },

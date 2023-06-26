@@ -48,6 +48,10 @@ dependencies:
   youtube_player_flutter: ^8.1.2
   chewie: ^1.0.0
   youtube_player_iframe_plus: ^2.3.2
+  multi_video_player: ^0.0.5
+  video_player_oneplusdream: ^1.0.1+1
+  player_js: ^1.0.4
+  flutter_downloader: ^1.10.4
 
 dev_dependencies:
   flutter_test:
