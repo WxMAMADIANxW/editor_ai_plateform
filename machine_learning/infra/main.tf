@@ -1,8 +1,21 @@
+module "ingress" {
+  source      = "./modules/ingress"
+  app_name    = var.app_name
+  region      = var.region
+  bucket_name = module.preprocess.s3_raw_bucket_name
+}
+
 module "preprocess" {
   source    = "./modules/preprocess"
   app_name  = var.app_name
   region    = var.region
   policy_s3 = var.policy_s3
+}
+
+module "queue" {
+  source        = "./modules/queue"
+  s3_bucket_arn = module.preprocess.s3_bucket_arn
+  s3_bucket_id  = module.preprocess.s3_bucket_id
 }
 
 module "inference" {
@@ -18,12 +31,6 @@ module "inference" {
   redis_password     = var.redis_password
 }
 
-module "queue" {
-  source        = "./modules/queue"
-  s3_bucket_arn = module.preprocess.s3_bucket_arn
-  s3_bucket_id  = module.preprocess.s3_bucket_id
-}
-
 module "cache" {
   source            = "./modules/cache"
   app_name          = var.app_name
@@ -33,9 +40,15 @@ module "cache" {
   redis_password    = var.redis_password
 }
 
-module "ingress" {
-  source      = "./modules/ingress"
+module "postprocess" {
+  source   = "./modules/postprocess"
+  app_name = var.app_name
+  region   = var.region
+}
+
+module "egress" {
+  source      = "./modules/egress"
   app_name    = var.app_name
   region      = var.region
-  bucket_name = module.preprocess.s3_raw_bucket_name
+  bucket_name = module.postprocess.s3_bucket_name
 }
