@@ -1,0 +1,4 @@
+redis
+redis-py-cluster
+boto3
+moviepy
