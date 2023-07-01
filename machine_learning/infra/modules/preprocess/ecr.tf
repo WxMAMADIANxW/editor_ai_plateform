@@ -23,6 +23,7 @@ resource null_resource preprocess_ecr_image {
   provisioner "local-exec" {
     command = <<EOF
            docker logout ${data.aws_caller_identity.current.account_id}.dkr.ecr.${var.region}.amazonaws.com
+           docker logout public.ecr.aws
            docker login --username ${data.aws_ecr_authorization_token.token.user_name} --password ${data.aws_ecr_authorization_token.token.password} ${local.account_id}.dkr.ecr.${var.region}.amazonaws.com
            cd ../preprocessing
            docker buildx build --platform linux/amd64 --provenance=false -t ${aws_ecr_repository.preprocess_repo.repository_url}:${local.ecr_image_tag} . --push
