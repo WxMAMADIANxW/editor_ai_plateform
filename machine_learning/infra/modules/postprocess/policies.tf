@@ -29,7 +29,7 @@ data "aws_iam_policy_document" "policy_s3" {
 
 # Create the IAM Role for the Cloudwatch logs
 resource "aws_iam_policy" "process_logging_policy" {
-  name   = "function-logging-policy"
+  name   = "function-postprocess-logging-policy"
   policy = jsonencode({
     "Version" : "2012-10-17", "Statement" : [
       {
