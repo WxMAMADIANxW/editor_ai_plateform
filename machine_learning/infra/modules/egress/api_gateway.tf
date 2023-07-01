@@ -1,23 +1,201 @@
-resource "aws_apigatewayv2_api" "s3download" {
-  name          = "s3download"
-  protocol_type = "HTTP"
+resource "aws_iam_role" "role" {
+  name               = "webhook-apigateway"
+  assume_role_policy = jsonencode(
+    {
+      "Version" : "2012-10-17", "Statement" : [
+      {
+        "Sid" : "", "Effect" : "Allow", "Principal" : {
+        "Service" : "apigateway.amazonaws.com"
+      }, "Action" : "sts:AssumeRole"
+      }
+    ]
+    }
+  )
+  tags = merge({
+    "Name" = "webhook-apigateway",
+  }
+  )
 }
-resource "aws_apigatewayv2_stage" "v1" {
-  api_id      = aws_apigatewayv2_api.s3download.id
-  name        = "v1"
-  auto_deploy = true
+resource "aws_iam_role_policy_attachment" "cloudwatch_apigateway" {
+  role       = aws_iam_role.role.id
+  policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonAPIGatewayPushToCloudWatchLogs"
 }
-resource "aws_apigatewayv2_integration" "s3download" {
-  api_id             = aws_apigatewayv2_api.s3download.id
-  integration_type   = "AWS_PROXY"
-  connection_type    = "INTERNET"
-  description        = "s3download presign url"
-  integration_method = "GET"
-  integration_uri    = aws_lambda_function.s3-egress-presigned-url-python.invoke_arn
+resource "aws_iam_role_policy" "ping_data_allow_access" {
+  name   = "webhook-apigateway"
+  role   = aws_iam_role.role.id
+  policy = jsonencode(
+    {
+      "Version" : "2012-10-17", "Statement" : [
+      {
+        "Sid" : "VisualEditor0", "Effect" : "Allow", "Action" : [
+        "s3:ListStorageLensConfigurations", "s3:ListAccessPointsForObjectLambda", "s3:GetAccessPoint",
+        "s3:PutAccountPublicAccessBlock", "s3:GetAccountPublicAccessBlock", "s3:ListAllMyBuckets",
+        "s3:ListAccessPoints", "s3:PutAccessPointPublicAccessBlock", "s3:ListJobs", "s3:PutStorageLensConfiguration",
+        "s3:ListMultiRegionAccessPoints", "s3:CreateJob"
+      ], "Resource" : "*"
+      }, {
+        "Sid" : "VisualEditor1", "Effect" : "Allow", "Action" : "s3:*", "Resource" : [
+          "arn:aws:s3:::webhook-apigateway*", "arn:aws:s3:::webhook-apigateway/*"
+        ]
+      }
+    ]
+    }
+  )
 }
-resource "aws_apigatewayv2_route" "s3download" {
-  api_id         = aws_apigatewayv2_api.s3download.id
-  operation_name = "s3download"
-  route_key      = "GET /url"
-  target         = "integrations/${aws_apigatewayv2_integration.s3download.id}"
+
+
+resource "aws_api_gateway_rest_api" "api" {
+  name        = "api-gateway-webhook"
+  description = "enable webhook for S3 bucket"
+  endpoint_configuration {
+    types = ["REGIONAL"]
+  }
+}
+
+resource "aws_api_gateway_api_key" "MyDemoApiKey" {
+  name = "webhook"
+}
+
+resource "aws_api_gateway_resource" "resource" {
+  rest_api_id = aws_api_gateway_rest_api.api.id
+  parent_id   = aws_api_gateway_rest_api.api.root_resource_id
+  path_part   = "{folder}"
+}
+
+resource "aws_api_gateway_method" "get_method" {
+  rest_api_id        = aws_api_gateway_rest_api.api.id
+  resource_id        = aws_api_gateway_resource.resource.id
+  http_method        = "GET"
+  authorization      = "NONE"
+  api_key_required   = "true"
+  request_parameters = {
+    "method.request.path.folder" = true
+  }
+}
+
+resource "aws_api_gateway_method_response" "get" {
+  rest_api_id     = aws_api_gateway_rest_api.api.id
+  resource_id     = aws_api_gateway_resource.resource.id
+  http_method     = aws_api_gateway_method.get_method.http_method
+  status_code     = "200"
+  response_models = {
+    "application/json" = "Empty"
+  }
+}
+
+resource "aws_api_gateway_method" "post_method" {
+  rest_api_id        = aws_api_gateway_rest_api.api.id
+  resource_id        = aws_api_gateway_resource.resource.id
+  http_method        = "POST"
+  authorization      = "NONE"
+  api_key_required   = "true"
+  request_parameters = {
+    "method.request.path.folder" = true
+  }
+}
+
+resource "aws_api_gateway_integration" "integration" {
+  rest_api_id             = aws_api_gateway_rest_api.api.id
+  resource_id             = aws_api_gateway_resource.resource.id
+  http_method             = aws_api_gateway_method.get_method.http_method
+  integration_http_method = "GET"
+  type                    = "AWS"
+  uri                     = "arn:aws:apigateway:${var.region}:s3:path/{bucket}"
+  credentials             = aws_iam_role.role.arn
+  request_parameters      = {
+    "integration.request.path.bucket" = "method.request.path.folder"
+  }
+}
+
+resource "aws_api_gateway_integration" "post_integration" {
+  rest_api_id             = aws_api_gateway_rest_api.api.id
+  resource_id             = aws_api_gateway_resource.resource.id
+  http_method             = aws_api_gateway_method.post_method.http_method
+  integration_http_method = "PUT"
+  type                    = "AWS"
+  uri                     = "arn:aws:apigateway:${var.region}:s3:path/{bucket}/{fileName}"
+  credentials             = aws_iam_role.role.arn
+  request_templates       = {
+    "application/json" = "#set($context.requestOverride.path.fileName = $context.requestId + '.json')\n$input.json('$')"
+  }
+  request_parameters = {
+    "integration.request.path.bucket" = "method.request.path.folder"
+  }
+}
+
+resource "aws_api_gateway_integration_response" "get" {
+  rest_api_id = aws_api_gateway_rest_api.api.id
+  resource_id = aws_api_gateway_resource.resource.id
+  http_method = aws_api_gateway_method.get_method.http_method
+  status_code = aws_api_gateway_method_response.get.status_code
+  depends_on  = [
+    aws_api_gateway_integration.post_integration, aws_api_gateway_integration.integration
+  ]
+}
+
+resource "aws_api_gateway_method_response" "post" {
+  rest_api_id     = aws_api_gateway_rest_api.api.id
+  resource_id     = aws_api_gateway_resource.resource.id
+  http_method     = aws_api_gateway_method.post_method.http_method
+  status_code     = "200"
+  response_models = {
+    "application/json" = "Empty"
+  }
+}
+
+resource "aws_api_gateway_integration_response" "post" {
+  rest_api_id = aws_api_gateway_rest_api.api.id
+  resource_id = aws_api_gateway_resource.resource.id
+  http_method = aws_api_gateway_method.post_method.http_method
+  status_code = aws_api_gateway_method_response.post.status_code
+  depends_on  = [
+    aws_api_gateway_integration.post_integration, aws_api_gateway_integration.integration
+  ]
+}
+
+resource "aws_api_gateway_deployment" "S3APIDeployment" {
+  rest_api_id = aws_api_gateway_rest_api.api.id
+  depends_on  = [
+    aws_api_gateway_integration.post_integration, aws_api_gateway_integration.integration, aws_api_gateway_rest_api.api
+  ]
+  triggers = {
+    redeployment = sha1(jsonencode([
+      aws_api_gateway_rest_api.api.body, aws_api_gateway_integration.post_integration.id,
+      aws_api_gateway_integration.integration.id
+    ]))
+  }
+  lifecycle {
+    create_before_destroy = true
+  }
+}
+
+resource "aws_api_gateway_stage" "S3API" {
+  deployment_id      = aws_api_gateway_deployment.S3APIDeployment.id
+  cache_cluster_size = "0.5"
+  rest_api_id        = aws_api_gateway_rest_api.api.id
+  stage_name         = "s3api"
+}
+
+resource "aws_api_gateway_usage_plan" "example" {
+  name        = "usage-plan"
+  description = "webhook-apigateway"
+  api_stages {
+    api_id = aws_api_gateway_rest_api.api.id
+    stage  = aws_api_gateway_stage.S3API.stage_name
+  }
+  quota_settings {
+    limit  = 20
+    offset = 2
+    period = "WEEK"
+  }
+  throttle_settings {
+    burst_limit = 5
+    rate_limit  = 10
+  }
+}
+
+resource "aws_api_gateway_usage_plan_key" "main" {
+  key_id        = aws_api_gateway_api_key.MyDemoApiKey.id
+  key_type      = "API_KEY"
+  usage_plan_id = aws_api_gateway_usage_plan.example.id
 }

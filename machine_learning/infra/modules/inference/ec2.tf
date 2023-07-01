@@ -17,8 +17,9 @@ resource "aws_instance" "inference_vm" {
                 source ~/.bashrc
                 EOF
 
-  #    vpc_security_group_ids = [aws_security_group.service_security_group.id]
-  subnet_id = aws_subnet.public.1.id # D'abord lancer celui là puis mettre à jour avec le vpc (voir ligne au dessus)
+  vpc_security_group_ids = [aws_security_group.service_security_group.id]
+  #    subnet_id = aws_subnet.public.1.id # D'abord lancer celui là puis mettre à jour avec le vpc (voir ligne au dessus)
+
   root_block_device {
     volume_size           = 100
     volume_type           = "gp2"

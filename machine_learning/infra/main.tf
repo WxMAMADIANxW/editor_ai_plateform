@@ -41,9 +41,16 @@ module "cache" {
 }
 
 module "postprocess" {
-  source   = "./modules/postprocess"
-  app_name = var.app_name
-  region   = var.region
+  source            = "./modules/postprocess"
+  app_name          = var.app_name
+  region            = var.region
+  redis_host        = module.cache.redis_host
+  redis_username    = module.cache.redis_username
+  redis_password    = var.redis_password
+  redis_port        = module.cache.redis_port
+  input_bucket_name = module.preprocess.s3_splitted_bucket_name
+  security_group_id = module.inference.security_group_id
+  subnet_ids        = module.inference.subnet_ids
 }
 
 module "egress" {

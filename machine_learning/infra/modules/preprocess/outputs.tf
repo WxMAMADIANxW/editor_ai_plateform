@@ -9,3 +9,7 @@ output "s3_bucket_arn" {
 output "s3_raw_bucket_name" {
   value = aws_s3_bucket.s3_bucket_raw.bucket
 }
+
+output "s3_splitted_bucket_name" {
+  value = aws_s3_bucket.s3_bucket_splitted.bucket
+}
