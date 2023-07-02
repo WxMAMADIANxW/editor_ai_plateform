@@ -1,5 +1,6 @@
 import 'dart:convert';
-
+import 'dart:html';
+ import 'package:http_parser/http_parser.dart';
 import 'package:aiditor_web/pages/project_page.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -30,8 +31,6 @@ class _HomePageState extends State<HomePage> {
         .get();
 
     final userProjects = querySnapshot.docs;
-    // print('Number of user projects: ${userProjects.length}');
-    // print('User Projects: $userProjects');
 
     return userProjects;
   }
@@ -41,8 +40,8 @@ class _HomePageState extends State<HomePage> {
     String projectName = '';
     String fileName = '';
     String projectType = 'lol';
-    // video file
-    PlatformFile? videoFile;
+    // ignore: prefer_typing_uninitialized_variables
+    var videoFile;
 
     showDialog(
       context: context,
@@ -73,11 +72,10 @@ class _HomePageState extends State<HomePage> {
                   children: [
                     ElevatedButton(
                       onPressed: () async {
-                        FilePickerResult? result =
-                            await FilePicker.platform.pickFiles();
+                        FilePickerResult? result = await FilePicker.platform.pickFiles();
 
                         if (result != null) {
-                          PlatformFile videoFile = result.files.first;
+                          videoFile = result.files.first;
 
                           setState(() {
                             fileName = videoFile.name;
@@ -138,12 +136,28 @@ class _HomePageState extends State<HomePage> {
                     'created_date': DateFormat('dd-MM-yyyy').format(DateTime.now()),
                     'user_id': user.uid,
                     'project_id': projectId,
-                    'project_type': projectType, // Add projectType to projectData
+                    'project_type': projectType,
                   };
+                  var date = DateFormat('yyyyMMdd').format(DateTime.now());
+
+                  final fileNameSub = fileName.substring(0, 8);
+                  final fileNameWithoutSpaces = fileNameSub.replaceAll(' ', '');
+                  final fileNameWithoutUnderScores =
+                      fileNameWithoutSpaces.replaceAll('_', '');
+                  final fileNameWithoutSpecialCharacters =
+                      fileNameWithoutUnderScores.replaceAll(RegExp(r'[^\w\s]+'), '');
+                  final finalFileName =
+                      fileNameWithoutSpecialCharacters.substring(0, fileNameWithoutSpecialCharacters.length - 3);
+
+                  var s3Filename = "$projectId/${finalFileName}_${projectType}_$date.mp4";
+                  print(s3Filename);
 
                   final videoData = {
+                    'project_id': projectId,
+                    'project_name': projectName,
                     'video_filename': fileName,
                     'type': projectType,
+                    's3filename': s3Filename,
                     'created_date': DateFormat('dd-MM-yyyy').format(DateTime.now()),
                   };
 
@@ -153,60 +167,88 @@ class _HomePageState extends State<HomePage> {
                         .doc(projectDocId)
                         .set(projectData);
 
-                    await FirebaseFirestore.instance
-                        .collection('aiditor_projects')
-                        .doc(projectDocId)
-                        .collection('aidited_videos')
-                        .doc()
-                        .set(videoData);
+                    // await FirebaseFirestore.instance
+                    //     .collection('aiditor_projects')
+                    //     .doc(projectDocId)
+                    //     .collection('aidited_videos')
+                    //     .doc()
+                    //     .set(videoData);
 
                     
 
+                    var url = 'https://7ga1us6g26.execute-api.us-east-1.amazonaws.com/v1/url/$s3Filename';
 
-                    // Delete spaces & special characters from the filename
-                    final fileNameWithoutSpaces = fileName.replaceAll(' ', '_');
-                    final fileNameWithoutSpecialCharacters =
-                        fileNameWithoutSpaces.replaceAll(RegExp(r'[^\w\s]+'), '');
-
-                    var date = DateFormat('dd-MM-yyyy').format(DateTime.now());
-
-                    var s3Filename =
-                        "$projectId/${fileNameWithoutSpecialCharacters}_${projectType}_$date.mp4";
-
-                    var url = Uri.parse('https://8hp8mmv29i.execute-api.us-east-1.amazonaws.com/v1/url');
+                    print("Sending request to backend");
+                    print("url: $url");
+                    
                     // Send request to backend to get signed URL
-
-                    print(url);
-                    //var getSignedUrlResponse = await 
-                    http.get(url);
+                    var getSignedUrlResponse = await http.get(
+                      Uri.parse(url),
+                      headers: {
+                        "Access-Control-Allow-Origin": "*", // Required for CORS support to work
+                        "Access-Control-Allow-Credentials":
+                            'true', // Required for cookies, authorization headers with HTTPS
+                        "Access-Control-Allow-Headers":
+                            "Origin,Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token,locale",
+                        "Access-Control-Allow-Methods": "POST, GET,OPTIONS"
+                      }
+                    );
                     
-                    //print(getSignedUrlResponse.body);
+
                     // Check if the response was successful
-                    // if (getSignedUrlResponse.statusCode == 200) {
-                    //   var responseBody = json.decode(getSignedUrlResponse.body); // Parse the response body as JSON
+                    print(getSignedUrlResponse.statusCode);
+                    print(videoFile.runtimeType);
 
-                    //   var signedUrl = responseBody['url'];
-                    //   var fields = responseBody['fields']; 
+                    if(getSignedUrlResponse.statusCode == 200){
+                      print("Response was successful");
 
-                    //   var formData = Map<String, String>.from(fields);
-                    //   formData['key'] = 'test.mp4';
-                    //   // formData['key'] = s3Filename;
-                    //   // Add file to the request
-                    //   formData['file'] = base64Encode(videoFile!.bytes!);
-                    //   print(base64Encode(videoFile!.bytes!));
-                    //   var postResponse = await http.post(Uri.parse(signedUrl), body: formData);
+                      //decode response body to json
+                      print('decode response body to json');
+                      var responseBody = jsonDecode(getSignedUrlResponse.body);
 
-                    //   if (postResponse.statusCode == 204) {
-                    //     // File uploaded successfully
-                    //     print('File uploaded successfully');
-                    //   } else {
-                    //     // File upload failed
-                    //     print('File upload failed with status code: ${postResponse.statusCode}');
-                    //   }
-                    // } else {
-                    //   // Failed to get signed URL
-                    //   print('Failed to get signed URL');
-                    // }
+                      //get signed url from response body
+                      print('get signed url from response body');
+                      var signedUrl = responseBody['url'];
+
+                      // get Fields from signed URL
+                      print('get Fields from signed URL');
+                      var fields = responseBody['fields'];
+
+                      // Create multipart request for uploading the video
+                      print('Create multipart request for uploading the video');
+                      var request = http.MultipartRequest('POST', Uri.parse(signedUrl));
+
+                      // Add fields to multipart request
+                      print('Add fields to multipart request');
+                      fields.forEach((key, value) {
+                        request.fields[key] = value;
+                        //print('$key: $value');
+                      });
+                      request.fields['key'] = s3Filename;
+
+                      // Create multipart file from video file
+                      print('Create multipart file from video file');
+                      var multipartFile = http.MultipartFile.fromBytes('file', videoFile.bytes, filename: s3Filename, contentType: MediaType('video', 'mp4')
+                      );
+                      // Add multipart file to multipart request
+                      print('Add multipart file to multipart request');
+                      request.files.add(multipartFile);
+
+                      // Send multipart request
+                      print('Send multipart request');
+                      var response = await request.send();
+
+                      // Check if the response was successful
+                      print('Check if the response was successful');
+                      if(response.statusCode == 204){
+                        print("Video uploaded successfully");
+                      }else{
+                        print("Video upload failed");
+                      }
+
+                    }else{
+                      throw Exception('Failed to get signed URL');
+                    }
 
                     // Reload projects
                     setState(() {});
@@ -231,6 +273,7 @@ class _HomePageState extends State<HomePage> {
       },
     );
   }
+
 
   @override
   Widget build(BuildContext context) {
@@ -268,15 +311,14 @@ class _HomePageState extends State<HomePage> {
               } else if (snapshot.hasError) {
                 return Text('Error: ${snapshot.error}');
               } else if (snapshot.hasData && snapshot.data!.isNotEmpty) {
-                // Display user's projects as cards
                 return GridView.builder(
                   gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 4, // Number of columns in the grid
+                    crossAxisCount: 4,
                     childAspectRatio: 4.0,
                     crossAxisSpacing: 8.0,
                     mainAxisSpacing: 8.0,
                   ),
-                  itemCount: snapshot.data!.length, // Updated line
+                  itemCount: snapshot.data!.length,
                   itemBuilder: (context, index) {
                     final project = snapshot.data![index].data();
                     final title = project['project_name'] ?? 'No Project Name';
@@ -285,22 +327,20 @@ class _HomePageState extends State<HomePage> {
 
                     return Card(
                       child: ListTile(
-                        onTap: (){
+                        onTap: () {
                           Navigator.of(context).push(
                             MaterialPageRoute(
-                              builder: (context) => ProjectDetailsScreen(projectId: projectId, ),//MyWidget(),
+                              builder: (context) => ProjectDetailsScreen(projectId: projectId),
                             ),
                           );
                         },
                         title: Text(title + '                                                         ' + projectId),
                         subtitle: Text(creationDate),
-                        // Add more project details if needed
                       ),
                     );
                   },
                 );
               } else {
-                // Display "No project" text and create project button
                 return Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [

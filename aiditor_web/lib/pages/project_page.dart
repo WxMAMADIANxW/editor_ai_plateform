@@ -23,12 +23,10 @@ class _ProjectDetailsScreenState extends State<ProjectDetailsScreen> {
 
   Widget _buildVideo(String url) {
     return Player(
-                  videoUrl:
-                  url,
-                  subtitles: {
-                  },
-                  height: 700,
-                  width: 900,
+      videoUrl: url,
+      subtitles: {},
+      height: 700,
+      width: 900,
     );
   }
 
@@ -56,11 +54,26 @@ class _ProjectDetailsScreenState extends State<ProjectDetailsScreen> {
 
     final projectVideos = querySnapshot.docs;
 
-    print('DocId: $docId');
-    print('Number of project videos: ${projectVideos.length}');
-    print('Project videos: $projectVideos');
+    // print('DocId: $docId');
+    // print('Number of project videos: ${projectVideos.length}');
+    // print('Project videos: $projectVideos');
 
     return projectVideos;
+  }
+
+  void playVideoInPopup(String videoUrl) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return Dialog(
+          child: Container(
+            width: MediaQuery.of(context).size.width * 0.6,
+            height: MediaQuery.of(context).size.height * 0.5,
+            child: _buildVideo(videoUrl),
+          ),
+        );
+      },
+    );
   }
 
   @override
@@ -86,13 +99,7 @@ class _ProjectDetailsScreenState extends State<ProjectDetailsScreen> {
             return Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Expanded(
-                  flex: 2,
-                  child: Container(
-                    margin: const EdgeInsets.all(40),
-                    child: _buildVideo(projectVideos.first.data()!['url'].toString()),
-                  ),
-                ),
+                const Expanded(flex:2 ,child: Text('Videos')),
                 Expanded(
                   flex: 1,
                   child: Container(
@@ -109,7 +116,7 @@ class _ProjectDetailsScreenState extends State<ProjectDetailsScreen> {
                           child: ListTile(
                             onTap: () {
                               setState(() {
-                                _currentVideoUrl = videoUrl ?? '';
+                                playVideoInPopup(videoUrl ?? '');
                               });
                             },
                             title: Text(videoName ?? ''),
@@ -121,7 +128,7 @@ class _ProjectDetailsScreenState extends State<ProjectDetailsScreen> {
                                   icon: Icon(Icons.play_arrow),
                                   onPressed: () {
                                     setState(() {
-                                      _currentVideoUrl = videoUrl ?? '';
+                                      playVideoInPopup(videoUrl ?? '');
                                     });
                                   },
                                 ),
