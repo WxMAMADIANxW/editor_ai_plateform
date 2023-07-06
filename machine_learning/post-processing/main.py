@@ -76,7 +76,7 @@ def fix_segments_overlap(segments_with_best_accuracies) -> dict:
 
 
 def aggregate_segments(fixed_segments) -> dict:
-    from moviepy.editor import VideoFileClip, concatenate_videoclips
+    from moviepy.editor import VideoFileClip
     for key, segments in fixed_segments.items():
         input_video_file = "/".join(key.split(':')[:-1])
         print("Input video file:", input_video_file)
@@ -95,6 +95,7 @@ def aggregate_segments(fixed_segments) -> dict:
             print(output_video_file)
             clip.write_videofile(output_video_file, temp_audiofile="/tmp/temp-audio.m4a", remove_temp=True, codec="libx264", audio_codec="aac")
             print("Wrote video file to:", output_video_file)
+        os.remove(f"{local_video_file}")  # TODO: Remove file locally after processing it and maybe upload it to S3 juste after the write_videofile
         #     clips.append(clip)
         # final_clip = concatenate_videoclips(clips)
         # final_clip.write_videofile(f"/tmp/{input_video_file}.mp4")

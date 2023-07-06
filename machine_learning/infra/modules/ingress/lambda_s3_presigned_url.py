@@ -36,9 +36,8 @@ def create_presigned_post(bucket_name, object_name, fields=None, conditions=None
 
 
 def lambda_handler(event, context):
-    object_name = 'test.mp4'  # TODO: Update this
-    print(f"Event received: {event}")
-    print(f"Context received: {context}")
+    print(f"Event received: {event['path']}")
+    object_name = event["path"][-2:]
 
     response = create_presigned_post(BUCKET_NAME, object_name)
     if response is None:

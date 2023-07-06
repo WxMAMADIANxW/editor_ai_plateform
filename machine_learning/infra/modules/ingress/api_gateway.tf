@@ -18,6 +18,6 @@ resource "aws_apigatewayv2_integration" "s3upload" {
 resource "aws_apigatewayv2_route" "s3upload" {
   api_id         = aws_apigatewayv2_api.s3upload.id
   operation_name = "s3upload"
-  route_key      = "GET /url"
+  route_key      = "GET /url/{folder}/{filename}"
   target         = "integrations/${aws_apigatewayv2_integration.s3upload.id}"
 }
